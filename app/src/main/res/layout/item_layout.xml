@@ -3,10 +3,12 @@
     android:orientation="vertical"
     android:background="@android:drawable/dialog_holo_light_frame"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="100dp">
     <TextView
         android:id="@+id/itemTv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textSize="20sp"
+        android:gravity="center"
         />
 </LinearLayout>

@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,30 +17,74 @@ public class MainActivity extends AppCompatActivity {
     SwipeRefreshLayout swipeRefreshLayout;
     List<String> data;
     MyAdapter myAdapter;
+    Button moveButton;
+    LinearLayoutManager linearLayoutManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        data=new ArrayList<>();
-        data.addAll(DummyData.generateDummyData(100));
-        myAdapter=new MyAdapter(data);
+        linearLayoutManager=new LinearLayoutManager(this);
+        data = new ArrayList<>();
+        moveButton= (Button) findViewById(R.id.moveButton);
+
+        moveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              linearLayoutManager.scrollToPosition(2);
+            }
+        });
+
+
+
+        data.addAll(DummyData.generateDummyData(10));
+        myAdapter = new MyAdapter(data);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(myAdapter);
-        swipeRefreshLayout= (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent,R.color.colorPrimary,R.color.colorPrimaryDark);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            int visibleItemCount = 0;
+            int pastVisibleItemCount = 0;
+            int totalItemCount = 0;
+            boolean loading = false;
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItemCount = linearLayoutManager.findFirstVisibleItemPosition();
+                    if (loading == false) {
+                        if ((visibleItemCount + pastVisibleItemCount) >= totalItemCount) {
+                            loading = true;
+                            new Handler(MainActivity.this.getMainLooper()).postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    data.addAll(DummyData.generateDummyData(10));
+                                    myAdapter.notifyDataSetChanged();
+                                    loading = false;
+                                }
+                            }, 1500);
+                        }
+                    }
+                }
+            }
+        });
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-              new Handler(MainActivity.this.getMainLooper()).postDelayed(new Runnable() {
-                  @Override
-                  public void run() {
-                      data.clear();
-                      data.addAll(DummyData.generateDummyData(100));
-                      myAdapter.notifyDataSetChanged();
-                      swipeRefreshLayout.setRefreshing(false);
-                  }
-              },1000);
+                new Handler(MainActivity.this.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        data.clear();
+                        data.addAll(DummyData.generateDummyData(10));
+                        myAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 1000);
             }
         });
 
