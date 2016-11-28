@@ -6,8 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> data;
     MyAdapter myAdapter;
     Button moveButton;
+
     LinearLayoutManager linearLayoutManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +37,10 @@ public class MainActivity extends AppCompatActivity {
               linearLayoutManager.scrollToPosition(2);
             }
         });
-
-
-
         data.addAll(DummyData.generateDummyData(10));
         myAdapter = new MyAdapter(data);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.addItemDecoration(new MyItemDecoration(this,R.color.colorAccent));
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(myAdapter);
 
